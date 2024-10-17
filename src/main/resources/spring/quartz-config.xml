@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+	">
+	
+	<!-- 주기적으로 실행될 클래스 설정 -->
+	<bean id="jobDetail1" class="org.springframework.scheduling.quartz.JobDetailFactoryBean"
+		p:jobClass="kr.co.test.quartz_job.Quartz1Job"
+		p:durability="true"
+		p:applicationContextJobDataKey="applicationContext"
+	/>
+	
+	<bean id="jobDetail2" class="org.springframework.scheduling.quartz.JobDetailFactoryBean"
+		p:jobClass="kr.co.test.quartz_job.Quartz2Job"
+		p:durability="true"
+		p:applicationContextJobDataKey="applicationContext"
+	/>
+
+	<!-- 스케줄러의 interval time 설정 -->
+	<bean id="simpleTrigger1" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean"
+		p:jobDetail-ref="jobDetail1"
+		p:repeatInterval="5000"
+	/>
+	
+	<bean id="cronTrigger1" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"
+		p:jobDetail-ref="jobDetail2"
+		p:cronExpression="0 0/1 * * * ?"
+	/>
+	
+	<!-- 스케줄러 동작 설정 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
+		p:triggers-ref="triggers"
+		p:quartzProperties-ref="quartzProperties"
+	/>
+	
+	<util:list id="triggers">
+		<ref bean="simpleTrigger1"/>
+		<ref bean="cronTrigger1"/>
+	</util:list>
+	
+	<util:properties id="quartzProperties">
+		<prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
+		<prop key="org.quartz.threadPool.threadCount">5</prop>
+		<prop key="org.quartz.threadPool.threadPriority">4</prop>
+		<prop key="org.quartz.jobStore.class">org.quartz.simpl.RAMJobStore</prop>
+		<prop key="org.quartz.jobStore.misfireThreshold">60000</prop>
+	</util:properties>
+		
+</beans>
